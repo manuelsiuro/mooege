@@ -37,11 +37,11 @@ namespace Mooege.Core.GS.Actors.Implementations.Monsters
             this.Attributes[GameAttribute.Hitpoints_Total_From_Level] = 0f;
             this.Attributes[GameAttribute.Hitpoints_Cur] = 5f;
 
-            //this.Attributes[GameAttribute.Skill_Total, 30244] = 1;  //Ghost_SoulSiphon.pow
-            //this.Attributes[GameAttribute.Skill, 30244] = 1;
-            //this.Attributes[GameAttribute.Trait, 30244] = 1;
-            //this.Attributes[GameAttribute.Buff_Active, 30244] = true;
-            //this.Attributes[GameAttribute.Buff_Icon_Count0, 30244] = 1;
+            this.Attributes[GameAttribute.Skill_Total, 30244] = 1;  //Ghost_SoulSiphon.pow
+            this.Attributes[GameAttribute.Skill, 30244] = 1;
+            this.Attributes[GameAttribute.Trait, 30244] = 1;
+            this.Attributes[GameAttribute.Buff_Active, 30244] = true;
+            this.Attributes[GameAttribute.Buff_Icon_Count0, 30244] = 1;
         }
     }
 }
