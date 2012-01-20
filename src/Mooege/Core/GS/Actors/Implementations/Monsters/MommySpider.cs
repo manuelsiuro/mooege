@@ -32,10 +32,12 @@ namespace Mooege.Core.GS.Actors.Implementations.Monsters
             : base(world, snoId, tags)
         {
             this.Brain = new MonsterBrain(this);
-            this.Attributes[GameAttribute.Hitpoints_Max_Total] = 5f;
-            this.Attributes[GameAttribute.Hitpoints_Max] = 5f;
+            this.Attributes[GameAttribute.Hitpoints_Max_Total] = 2f;
+            this.Attributes[GameAttribute.Hitpoints_Max] = 2f;
             this.Attributes[GameAttribute.Hitpoints_Total_From_Level] = 0f;
-            this.Attributes[GameAttribute.Hitpoints_Cur] = 5f;
+            this.Attributes[GameAttribute.Hitpoints_Cur] = 2f;
+
+            this.Attributes[GameAttribute.Movement_Bonus_Run_Speed] = 15f;
 
             this.Attributes[GameAttribute.Skill_Total, 76961] = 1;  //Spider_Web_Slow.pow
             this.Attributes[GameAttribute.Skill, 76961] = 1;
