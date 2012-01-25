@@ -29,11 +29,13 @@ using Mooege.Core.GS.Common.Types.Math;
 using Mooege.Core.GS.Common.Types.SNO;
 using Mooege.Core.GS.Items;
 using Mooege.Core.GS.Map;
+using Mooege.Net.GS.Message;
 using Mooege.Core.MooNet.Commands;
 using Mooege.Core.MooNet.Games;
 using Mooege.Net.MooNet;
 using System.Text;
 using Monster = Mooege.Core.GS.Actors.Monster;
+using Mooege.Core.MooNet.Toons;
 
 namespace Mooege.Core.GS.Games
 {
@@ -159,37 +161,43 @@ namespace Mooege.Core.GS.Games
         }
     }
 
-    //[CommandGroup("levelup", "Levels your character.")]
-    //public class LevelUpCommand : CommandGroup
-    //{
-    //    [DefaultCommand]
-    //    public string LevelUp(string[] @params, MooNetClient invokerClient)
-    //    {
-    //        // TODO: does not work, should be actually refactoring Player.cs:UpdateExp() and use it. /raist.
 
-    //        if (invokerClient == null)
-    //            return "You can not invoke this command from console.";
+    [CommandGroup("setlevel", "Set the Level for your character.")]
+    public class LevelUpCommand : CommandGroup
+    {
+        [DefaultCommand]
+        public string LevelUp(string[] @params, MooNetClient invokerClient)
+        {
+            //TODO: Correct it to work while staying in-game by correcting the icon level, and correcting the experience bar.
 
-    //        if (invokerClient.InGameClient == null)
-    //            return "You can only invoke this command while ingame.";
+            //TODO: set a Max of 60.
 
-    //        var player = invokerClient.InGameClient.Player;
-    //        var amount = 1;
+            if (invokerClient == null)
+                return "You can not invoke this command from console.";
 
-    //        if(@params!=null)
-    //        {
-    //            if (!Int32.TryParse(@params[0], out amount))
-    //                amount = 1;
-    //        }
+            var amount = 1;
 
-    //        for(int i=0;i<amount;i++)
-    //        {
-    //            player.Toon.LevelUp();                
-    //        }
+            if (@params != null)
+            {
+                if (!Int32.TryParse(@params[0], out amount))
+                    amount = 1;
+            }
 
-    //        return string.Format("New level: {0}", player.Toon.Level);
-    //    }
-    //}
+            //if client in game
+            if (invokerClient.InGameClient != null)
+            {
+                var player = invokerClient.InGameClient.Player;
+                player.Attributes[GameAttribute.Level] = amount;
+                player.PlayEffect(Net.GS.Message.Definitions.Effect.Effect.LevelUp);
+            }
+
+            var hero = ToonManager.GetToonByLowID(invokerClient.Account.CurrentGameAccount.CurrentHeroIdField.Value.IdLow);
+            hero.HeroLevelField.Value = amount;
+            invokerClient.Account.CurrentGameAccount.NotifyUpdate();
+
+            return string.Format("If in game log out and log back in for icon update to level: " + amount);
+        }
+    }
 
     [CommandGroup("item", "Spawns an item (with a name or type).\nUsage: item [type <type>|<name>] [amount]")]
     public class ItemCommand : CommandGroup
@@ -525,6 +533,22 @@ namespace Mooege.Core.GS.Games
             }
             return matches.Aggregate(matches.Count >= 1 ? "Item Matches:\n" : "No match found.",
                                      (current, match) => current + string.Format("[{0}] {1}\n", match.SNOActor.ToString("D6"), match.Name));
+        }
+    }
+    [CommandGroup("testitems", "Spawns Sword, XBow, and Runestones")]
+    public class TestItemsCommand : CommandGroup
+    {
+        [DefaultCommand]
+        public string testitems(string[] @params, MooNetClient invokerClient)
+        {
+            var player = invokerClient.InGameClient.Player;
+
+            Items.ItemGenerator.Cook((Players.Player)player, "Sword_2H_205").EnterWorld(player.Position);
+            Items.ItemGenerator.Cook((Players.Player)player, "Crossbow_102").EnterWorld(player.Position);
+            for (int n = 0; n < 30; ++n)
+                Items.ItemGenerator.Cook((Players.Player)player, "Runestone_Unattuned_07").EnterWorld(player.Position);
+
+            return string.Format("Spawned test items");
         }
     }
 }

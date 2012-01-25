@@ -1673,39 +1673,23 @@ namespace Mooege.Core.GS.Powers.Implementations
         {
             //StartCooldown(WaitSeconds(10f));
 
-            Vector3D delta = new Vector3D(TargetPosition - User.Position);
-            float delta_length = (float)Math.Sqrt(delta.X * delta.X + delta.Y * delta.Y);
-            Vector3D delta_normal = new Vector3D(delta.X / delta_length, delta.Y / delta_length, delta.Z / delta_length);
-            float unitsMovedPerTick = 60f;
-            Vector3D ramp = new Vector3D(delta_normal.X * (delta_length / unitsMovedPerTick),
-                                         delta_normal.Y * (delta_length / unitsMovedPerTick),
-                                         0.1f); // usual leap height, possibly different when jumping up/down?
-
-            // TODO: Generalize this and put it in 
-            
-            User.World.BroadcastIfRevealed(new ACDTranslateArcMessage()
+            ActorMover mover = new ActorMover(User);
+            mover.MoveArc(TargetPosition, 3, -0.1f, new ACDTranslateArcMessage
             {
-                ActorId = (int)User.DynamicID,
-                Start = User.Position,
-                Velocity = ramp,
-                //Field3 = 69793, // used for male barb leap
-                FlyingAnimationTagID = 69792, // used for female dh backflip
-                LandingAnimationTagID = 69794,
-                Field6 = -0.1f, // gravity
-                Field7 = Skills.Skills.DemonHunter.Discipline.Vault,
-                Field8 = 0,
-                Field9 = TargetPosition.Z,
-            }, User);
+                //Field3 = 303110, // used for male barb leap, not needed?
+                FlyingAnimationTagID = AnimationSetKeys.Attack2.ID,
+                LandingAnimationTagID = -1,
+                Field7 = PowerSNO
+            });
 
-            User.Position = TargetPosition;
-
-            // wait for leap to hit
-            yield return WaitSeconds(0.6f);
+            // wait for landing
+            while (!mover.Update())
+                yield return WaitTicks(1);
 
             yield break;
         }
     }
-#endregion
+    #endregion
 
     //TODO:Fix Rune B projectile on User, Check Rune_E
     #region FanOfKnives

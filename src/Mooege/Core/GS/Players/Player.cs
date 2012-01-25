@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2011 mooege project
  *
  * This program is free software; you can redistribute it and/or modify
@@ -322,7 +322,7 @@ namespace Mooege.Core.GS.Players
 
             //Basic stats
             this.Attributes[GameAttribute.Level_Cap] = 13;
-            this.Attributes[GameAttribute.Level] = 30; //this has been changed so skills can be used. Originally "this.Toon.Level;"
+            this.Attributes[GameAttribute.Level] = (int)this.Toon.HeroLevelField.Value;
             this.Attributes[GameAttribute.Experience_Next] = LevelBorders[(int)this.Toon.HeroLevelField.Value];
             this.Attributes[GameAttribute.Experience_Granted] = 1000;
             this.Attributes[GameAttribute.Armor_Total] = 0;
@@ -652,14 +652,14 @@ namespace Mooege.Core.GS.Players
             // here we should also be checking the position and see if it's valid. If not we should be resetting player to a good position with ACDWorldPositionMessage
             // so we can have a basic precaution for hacks & exploits /raist.
             if (message.Position != null)
-            /*{
-                if (this.CurrentScene.NavMesh.WalkGrid[(int)((this.Position.X - this.World.QuadTree.Query<Mooege.Core.GS.Map.Scene>(message.Position).FirstOrDefault().Bounds.Left) / 2.5f), (int)((this.Position.Y - this.World.QuadTree.Query<Mooege.Core.GS.Map.Scene>(message.Position).FirstOrDefault().Bounds.Top) / 2.5f)] == 0)
+            {
+                if (!client.Player.World.CheckLocationForFlag(message.Position,Mooege.Common.MPQ.FileFormats.Scene.NavCellFlags.AllowWalk))
                     {
                         Logger.Info("Account: " + client.BnetClient.Account.Name + " Attempted to move to an unwalkable location");
                         return;
-                    }*/
+                    }
                 this.Position = message.Position;
-            //}
+            }
                 
 
             this.SetFacingRotation(message.Angle);
@@ -671,7 +671,7 @@ namespace Mooege.Core.GS.Players
                 Angle = message.Angle,
                 TurnImmediately = false,
                 Speed = message.Speed,
-                //Field5 = message.Field5,  // TODO: don't even know what this is, might be message.Field6 now?
+                //Field5 = message.Field5,
                 AnimationTag = message.AnimationTag
             };
 
@@ -1127,6 +1127,7 @@ namespace Mooege.Core.GS.Players
                 snoActiveSkills = this.SkillSet.ActiveSkills,
                 snoTraits = this.SkillSet.PassiveSkills,
                 SavePointData = new SavePointData { snoWorld = -1, SavepointId = -1, },
+                //m_SeenTutorials = this.SeenTutorials,
             };
         }
 

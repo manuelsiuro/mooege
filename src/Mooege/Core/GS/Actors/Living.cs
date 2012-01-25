@@ -27,6 +27,8 @@ using Mooege.Net.GS.Message;
 using Mooege.Net.GS.Message.Definitions.Animation;
 using Mooege.Core.GS.Common.Types.TagMap;
 using Mooege.Core.GS.Common.Types.SNO;
+using Mooege.Core.GS.Powers.Payloads;
+using Mooege.Core.GS.Powers;
 
 namespace Mooege.Core.GS.Actors
 {
@@ -77,6 +79,12 @@ namespace Mooege.Core.GS.Actors
                
             }
             return true;
+        }
+
+        public void Kill(PowerContext context = null, bool lootAndExp = false)
+        {
+            var deathload = new DeathPayload(context, Powers.DamageType.Physical, this, lootAndExp);
+            deathload.Apply();
         }
     }
 }

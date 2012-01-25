@@ -39,7 +39,7 @@ namespace Mooege.Core.GS.Powers.Implementations
 
         protected IEnumerable<TickTimer> Launch()
         {
-            projectile.Launch(TargetPosition, speed);
+            projectile.Launch(Target.Position, speed);
             yield break;
         }
     }
@@ -54,6 +54,7 @@ namespace Mooege.Core.GS.Powers.Implementations
                 WeaponDamage(hit, 1.00f, DamageType.Physical);
                 projectile.Destroy();
             });
+            StartCooldown(WaitSeconds(5f)); //Let's not fire them off too many times..
             return Launch();
         }
     }
@@ -70,6 +71,7 @@ namespace Mooege.Core.GS.Powers.Implementations
                 projectile.Destroy();
             });
             projectile.Position.Z += 5f; //adjust height
+            StartCooldown(WaitSeconds(5f)); //Let's not fire them off too many times..
             return Launch();
         }
     }
@@ -86,6 +88,7 @@ namespace Mooege.Core.GS.Powers.Implementations
                 projectile.Destroy();
             });
             projectile.Position.Z += 2f + (float)Rand.NextDouble() * 4;
+            StartCooldown(WaitSeconds(5f)); //Let's not fire them off too many times..
             return Launch();
         }
     }

@@ -114,7 +114,7 @@ namespace Mooege.Common.MPQ.FileFormats
                 // Loop thru each NavmeshSquare in the array, and fills the grid
                 for (int i = 0; i < NavMeshSquareCount; i++)
                 {
-                    WalkGrid[i % SquaresCountY, i / SquaresCountY] = (byte)(Squares[i].Flags & Scene.NavCellFlags.AllowWalk);
+                    WalkGrid[i % SquaresCountX, i / SquaresCountY] = (byte)(Squares[i].Flags & Scene.NavCellFlags.AllowWalk);
                    // Set the grid to 0x1 if its walkable, left as 0 if not. - DarkLotus
                 }
 

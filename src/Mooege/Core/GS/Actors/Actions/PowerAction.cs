@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2011 mooege project
  *
  * This program is free software; you can redistribute it and/or modify
@@ -47,6 +47,7 @@ namespace Mooege.Core.GS.Actors.Actions
             : base(owner)
         {
             _power = PowerLoader.CreateImplementationForPowerSNO(powerSNO);
+            _power.World = owner.World;
             _power.User = owner;
             _powerRan = false;
             _baseAttackRadius = this.Owner.ActorData.Cylinder.Ax2 + _power.EvalTag(PowerKeys.AttackRadius) + 1.5f;

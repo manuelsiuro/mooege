@@ -33,6 +33,7 @@ using System.Threading;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Globalization;
+using System.Threading.Tasks;
 
 namespace Mooege.Core.GS.Powers
 {
@@ -60,11 +61,15 @@ namespace Mooege.Core.GS.Powers
         public PowerManager()
         {
         }
-
+        
         public void Update()
         {
             //Always run update in a new thread for scalability.
             //Should not be run on the same thread as cancel powers as some of scripts result in cancel of all scripts for a target
+            
+            //Using TaskFactory is alot quicker on Windows, Creating brandnew trheads is pretty heavy, need to use a pool or something if not tasks - DarkLotus
+            //Task updateTask = Task.Factory.StartNew(_UpdateExecutingScripts);
+          
             Thread updateThread = new Thread(_UpdateExecutingScripts);
             updateThread.CurrentCulture = CultureInfo.InvariantCulture;
             updateThread.Start();
@@ -123,6 +128,7 @@ namespace Mooege.Core.GS.Powers
             }
 
             #region Items and Monster spawn HACK
+            /*
             // HACK: intercept hotbar skill 1 to always spawn test mobs.
             if (user is Player && powerSNO == (user as Player).SkillSet.HotBarSkills[4].SNOSkill)
             {
@@ -160,20 +166,20 @@ namespace Mooege.Core.GS.Powers
                         position.Y += (float)(RandomHelper.NextDouble() - 0.5) * 20;
                         position.Z = user.Position.Z;
                     }
-                    /*
-                    Monster mon = new Monster(user.World, actorSNO, null);
-                    mon.SetBrain(new Mooege.Core.GS.AI.Brains.MonsterBrain(mon));
-                    mon.Position = position;
-                    mon.Scale = 1.35f;
-                    mon.Attributes[GameAttribute.Hitpoints_Max_Total] = 5f;
-                    mon.Attributes[GameAttribute.Hitpoints_Max] = 5f;
-                    mon.Attributes[GameAttribute.Hitpoints_Total_From_Level] = 0f;
-                    mon.Attributes[GameAttribute.Hitpoints_Cur] = 5f;
-                    mon.Attributes[GameAttribute.Attacks_Per_Second_Total] = 1.0f;
-                    mon.Attributes[GameAttribute.Damage_Weapon_Min_Total, 0] = 5f;
-                    mon.Attributes[GameAttribute.Damage_Weapon_Delta_Total, 0] = 7f;
-                    mon.Attributes[GameAttribute.Casting_Speed_Total] = 1.0f;
-                    user.World.Enter(mon);*/
+                    
+                    //Monster mon = new Monster(user.World, actorSNO, null);
+                    //mon.SetBrain(new Mooege.Core.GS.AI.Brains.MonsterBrain(mon));
+                    //mon.Position = position;
+                    //mon.Scale = 1.35f;
+                    //mon.Attributes[GameAttribute.Hitpoints_Max_Total] = 5f;
+                    //mon.Attributes[GameAttribute.Hitpoints_Max] = 5f;
+                    //mon.Attributes[GameAttribute.Hitpoints_Total_From_Level] = 0f;
+                    //mon.Attributes[GameAttribute.Hitpoints_Cur] = 5f;
+                    //mon.Attributes[GameAttribute.Attacks_Per_Second_Total] = 1.0f;
+                    //mon.Attributes[GameAttribute.Damage_Weapon_Min_Total, 0] = 5f;
+                    //mon.Attributes[GameAttribute.Damage_Weapon_Delta_Total, 0] = 7f;
+                    //mon.Attributes[GameAttribute.Casting_Speed_Total] = 1.0f;
+                    //user.World.Enter(mon);
 
                     Monster mon = new QuillDemon(user.World, actorSNO, null);
                     mon.Position = position;
@@ -192,9 +198,9 @@ namespace Mooege.Core.GS.Powers
                 }
 
                 return true;
-            }
+            }*/
             #endregion
-
+            
             // find and run a power implementation
             var implementation = PowerLoader.CreateImplementationForPowerSNO(powerSNO);
             if (implementation != null)

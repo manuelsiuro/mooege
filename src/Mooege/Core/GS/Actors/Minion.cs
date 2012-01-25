@@ -36,13 +36,15 @@ using System;
 using Mooege.Core.GS.Common.Types.TagMap;
 using MonsterFF = Mooege.Common.MPQ.FileFormats.Monster;
 using ActorFF = Mooege.Common.MPQ.FileFormats.Actor;
+using Mooege.Core.GS.AI.Brains;
+using Mooege.Core.GS.Ticker;
 
 
 namespace Mooege.Core.GS.Actors
 {
     public class Minion : Living, IUpdateable
     {
-        protected Actor Master; //The player who summoned the minion.
+        public Actor Master; //The player who summoned the minion.
 
         public override ActorType ActorType { get { return ActorType.Monster; } }
 
@@ -58,12 +60,15 @@ namespace Mooege.Core.GS.Actors
             }
         }
 
-        public Minion(World world, int snoId, TagMap tags)
+        public Minion(World world, int snoId, Actor master, TagMap tags)
             : base(world, snoId, tags)
         {
             // The following two seems to be shared with monsters. One wonders why there isn't a specific actortype for minions.
+            this.Master = master;
             this.Field2 = 0x8; 
             this.GBHandle.Type = (int)GBHandleType.Monster; this.GBHandle.GBID = 1;
+            this.Attributes[GameAttribute.Summoned_By_ACDID] = (int)master.DynamicID;
+            this.Attributes[GameAttribute.TeamID] = master.Attributes[GameAttribute.TeamID];
         }
 
         public override void OnTargeted(Player player, TargetMessage message)
@@ -81,6 +86,11 @@ namespace Mooege.Core.GS.Actors
         public void SetBrain(Mooege.Core.GS.AI.Brain brain)
         {
             this.Brain = brain;
+        }
+
+        public void AddPresetPower(int powerSNO)
+        {
+            (Brain as MonsterBrain).AddPresetPower(powerSNO);
         }
     }
 }

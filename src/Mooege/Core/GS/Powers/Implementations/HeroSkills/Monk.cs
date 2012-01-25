@@ -747,7 +747,7 @@ namespace Mooege.Core.GS.Powers.Implementations
     }
     #endregion
 
-    //TODO:Rune_A(Dash), Rune_E(Stage3), and Stage 2
+    //TODO:Rune_A(Dash), Rune_E(Stage3), and Stage 2  //exception on third stage ?
     #region WayOfTheHundredFists
     [ImplementsPowerSNO(Skills.Skills.Monk.SpiritGenerator.WayOfTheHundredFists)]
     public class MonkWayOfTheHundredFists : ComboSkill
@@ -778,6 +778,7 @@ namespace Mooege.Core.GS.Powers.Implementations
                             GeneratePrimaryResource(ScriptFormula(24));
                         }
                     }
+
                     bool hitAnything = false;
                     AttackPayload attack = new AttackPayload(this);
                     attack.Targets = GetEnemiesInArcDirection(User.Position, TargetPosition, ScriptFormula(30), ScriptFormula(31));
@@ -785,8 +786,11 @@ namespace Mooege.Core.GS.Powers.Implementations
                     attack.OnHit = hitPayload =>
                     {
                         hitAnything = true;
-                        AddBuff(hitPayload.Target, new RuneA_DOT_100Fists());
-                        Knockback(hitPayload.Target, ScriptFormula(5), ScriptFormula(6));
+                        Knockback(hitPayload.Target, ScriptFormula(5), ScriptFormula(6)); 
+                        if (Rune_A > 0)
+                        {
+                            AddBuff(hitPayload.Target, new RuneA_DOT_100Fists());
+                        }
                     };
                     attack.Apply();
 
@@ -864,7 +868,10 @@ namespace Mooege.Core.GS.Powers.Implementations
                 attack.OnHit = hitPayload =>
                 {
                     hitAnything = true;
-                    AddBuff(hitPayload.Target, new RuneA_DOT_100Fists());
+                    if (Rune_A > 0)
+                    {
+                        AddBuff(hitPayload.Target, new RuneA_DOT_100Fists());
+                    }
                 };
                 attack.Apply();
 
@@ -902,6 +909,17 @@ namespace Mooege.Core.GS.Powers.Implementations
                 }
 
                 return false;
+            }
+            public override bool Apply()
+            {
+                if (!base.Apply())
+                    return false;
+                return true;
+            }
+
+            public override void Remove()
+            {
+                base.Remove();
             }
         }
         [ImplementsPowerBuff(1, true)]
@@ -1190,21 +1208,19 @@ namespace Mooege.Core.GS.Powers.Implementations
     }
     #endregion
 
-    //TODO Rune_A,B,C,E
+    //TODO Rune_C
     #region BlindingFlash
     [ImplementsPowerSNO(Skills.Skills.Monk.SpiritSpenders.BlindingFlash)]
     public class MonkBlindingFlash : Skill
     {
-        //Rune_D = done.
-
-        //buff[1] selfbuff
-        //buff[2] unknown
-        //buff[3] mass_confused
-        //buff[4] indigo debuff
+        //Rune_D,B,A,E = done.
+        //buff[3] mass_confused -> Rune_C
         public override IEnumerable<TickTimer> Main()
         {
             StartCooldown(EvalTag(PowerKeys.CooldownTime));
             UsePrimaryResource(EvalTag(PowerKeys.ResourceCost));
+
+            var UsedPoint = SpawnProxy(User.Position);
 
             AttackPayload attack = new AttackPayload(this);
             attack.Targets = GetEnemiesInRadius(User.Position, ScriptFormula(1));
@@ -1215,13 +1231,30 @@ namespace Mooege.Core.GS.Powers.Implementations
                 // add main effect buff only if blind debuff took effect
                 if (AddBuff(hit.Target, new DebuffBlind(waitBuffEnd)))
                     AddBuff(hit.Target, new MainEffectBuff(waitBuffEnd));
+                if (Rune_C > 0)
+                {
+                    //chance of Charm.
+                }
             };
             attack.Apply();
 
             if (Rune_B > 0)
             {
                 yield return WaitSeconds(ScriptFormula(11));
-                //Debuff indigo secondary blind.
+                UsedPoint.PlayEffectGroup(139497);
+                AttackPayload attack2 = new AttackPayload(this);
+                attack2.Targets = GetEnemiesInRadius(UsedPoint.Position, ScriptFormula(1));
+                attack2.OnHit = (hit) =>
+                {
+                    TickTimer waitBuffEnd = WaitSeconds(ScriptFormula(13));
+
+                    // add main effect buff only if blind debuff took effect
+                    if (AddBuff(hit.Target, new DebuffBlind(waitBuffEnd)))
+                        AddBuff(hit.Target, new MainEffectBuff(waitBuffEnd));
+                        AddBuff(hit.Target, new IndigoDebuff(waitBuffEnd));
+                        
+                };
+                attack2.Apply();
             }
 
             yield break;
@@ -1250,6 +1283,55 @@ namespace Mooege.Core.GS.Powers.Implementations
                 base.Remove();
                 Target.Attributes[GameAttribute.Hit_Chance] += ScriptFormula(8);
                 Target.Attributes.BroadcastChangedIfRevealed();
+                if (Rune_A > 0)
+                {
+                    //addbuff that adds holy damage
+                    AddBuff(User, new FlashingRuneABuff(WaitSeconds(ScriptFormula(3))));
+                }
+            }
+        }
+        [ImplementsPowerBuff(1)]
+        class FlashingRuneABuff : PowerBuff
+        {
+            public FlashingRuneABuff(TickTimer timeout)
+            {
+                Timeout = timeout;
+            }
+
+            public override bool Apply()
+            {
+                if (!base.Apply())
+                    return false;
+
+                Target.Attributes[GameAttribute.Attack_Bonus_Percent] += ScriptFormula(4);
+                Target.Attributes.BroadcastChangedIfRevealed();
+                return true;
+            }
+
+            public override void Remove()
+            {
+                base.Remove();
+                Target.Attributes[GameAttribute.Attack_Bonus_Percent] -= ScriptFormula(4);
+                Target.Attributes.BroadcastChangedIfRevealed();
+            }
+        }
+        [ImplementsPowerBuff(4)]
+        class IndigoDebuff : PowerBuff
+        {
+            public IndigoDebuff(TickTimer timeout)
+            {
+                Timeout = timeout;
+            }
+            public override bool Apply()
+            {
+                if (!base.Apply())
+                    return false;
+                return true;
+            }
+
+            public override void Remove()
+            {
+                base.Remove();
             }
         }
     }
@@ -1357,13 +1439,14 @@ namespace Mooege.Core.GS.Powers.Implementations
 
         public override void OnChannelUpdated()
         {
-            UsePrimaryResource(ScriptFormula(16));
+            UsePrimaryResource(ScriptFormula(16)/4f);
             User.TranslateFacing(TargetPosition);
             // client updates target actor position
         }
 
         public override IEnumerable<TickTimer> Main()
         {
+            AddBuff(User, new TempestBuff());
             AttackPayload attack = new AttackPayload(this);
             //TODO: damage offset from ground?? where does this go..
             attack.Targets = GetEnemiesInArcDirection(User.Position, TargetPosition, ScriptFormula(2), ScriptFormula(1));
@@ -1378,7 +1461,28 @@ namespace Mooege.Core.GS.Powers.Implementations
                 };
             attack.Apply();
 
-            yield return WaitSeconds(ScriptFormula(1));
+            yield break;
+        }
+        [ImplementsPowerBuff(0)]
+        class TempestBuff : PowerBuff
+        {
+            public override void Init()
+            {
+                base.Init();
+                Timeout = WaitSeconds(0.5f);
+            }
+
+            public override bool Apply()
+            {
+                if (!base.Apply())
+                    return false;
+                return true;
+            }
+
+            public override void Remove()
+            {
+                base.Remove();
+            }
         }
     }
     #endregion
@@ -1396,11 +1500,11 @@ namespace Mooege.Core.GS.Powers.Implementations
         {
             return base.GetContactEffectSNO();
         }
-        //TODO: Change actor animations to be Proxy first, then Bell, (then shattered then destroyed?)
+        //From videos: it seems you proxy the Proxy actor first, the "hit" looks like it goes with the projectile...
         public override IEnumerable<TickTimer> Main()
         {
             StartCooldown(EvalTag(PowerKeys.CooldownTime));
-            UsePrimaryResource(EvalTag(PowerKeys.ResourceCost));
+            //UsePrimaryResource(EvalTag(PowerKeys.ResourceCost));
 
             //projectile distance (50)
             if (Rune_B > 0)

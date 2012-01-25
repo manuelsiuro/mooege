@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2011 mooege project
  *
  * This program is free software; you can redistribute it and/or modify
@@ -244,10 +244,10 @@ namespace Mooege.Core.GS.Powers
         {
             get
             {
-                if (User is Player)
+                if (User is Player || User is Minion)
                     return (actor) => actor is Monster;
                 else
-                    return (actor) => actor is Player;
+                    return (actor) => actor is Player || actor is Minion;
             }
         }
 
@@ -255,8 +255,8 @@ namespace Mooege.Core.GS.Powers
         {
             get
             {
-                if (User is Player)
-                    return (actor) => actor is Player;
+                if (User is Player || User is Minion)
+                    return (actor) => actor is Player || actor is Minion;
                 else
                     return (actor) => actor is Monster;
             }
